@@ -69,7 +69,7 @@ bash "run_update" do
 	user "root"
 	cwd node['minecraft_userpath']
 	code <<-EOH
-	sudo /etc/init.d/minecraft update
+	/etc/init.d/minecraft update
 	EOH
 end
 
@@ -99,11 +99,11 @@ bash "start_minecraft" do
         cwd node['minecraft_userpath']
         code <<-EOH
 	sleep 20
-        sudo /etc/init.d/minecraft stop
+        /etc/init.d/minecraft stop
 	sleep 10
-        sudo /etc/init.d/minecraft start
+        /etc/init.d/minecraft start
 	sleep 10
-        sudo /etc/init.d/minecraft status
+        /etc/init.d/minecraft status
         EOH
 end
 
