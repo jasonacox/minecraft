@@ -8,4 +8,5 @@ default['minecraft_cpu'] = "1"
 default['minecraft_xms'] = "512M"
 default['minecraft_server_motd'] = "Welcome to Chef Minecraft"
 default['minecraft_server_whitelist'] = "true"
+default['minecraft_eula'] = "true"
 

@@ -2,7 +2,7 @@
 # Cookbook Name:: minecraft
 # Recipe:: default
 # Description:: Set up a minecraft server on an EC2 server.
-# Copyright 2014, Jason Cox
+# Copyright 2015, Jason Cox
 #
 # All rights reserved - Do Not Redistribute
 #
@@ -89,6 +89,17 @@ end
 # create minecraft whitelist 
 template "#{node['minecraft_mcpath']}/white-list.txt" do
         source "white-list.erb"
+        mode 0664
+        owner "minecraft"
+        group "minecraft"
+end
+
+# create minecraft eula file
+template "#{node['minecraft_mcpath']}/eula.txt" do
+        source "eula.erb"
+        variables(
+          :minecraft_eula => node['minecraft_eula']
+	}
         mode 0664
         owner "minecraft"
         group "minecraft"
