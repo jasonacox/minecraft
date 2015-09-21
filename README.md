@@ -86,6 +86,8 @@ The setup-chef-client.sh file would look something like this:
 	#!/bin/bash
 	cd ~
 	sudo yum update
+	sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+	sudo sed -i 's/ZONE=\"UTC/ZONE=\"America\/Los_Angeles/' /etc/sysconfig/clock
 	sudo true && curl -L https://www.opscode.com/chef/install.sh | sudo bash
 	sudo yum install -y git
 	cd ~
