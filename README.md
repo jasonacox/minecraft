@@ -7,6 +7,11 @@ This is a Minecraft server cookbook.  It installs the dependencies and minecraft
 - Google
 - Rackspace
 
+Included in this cookbook:
+- Cron jobs for nightly backups
+- Monit services to restart minecraft if it crashes
+- Yum-updatesd to auto-patch server once a week
+
 Requirements
 ============
 
@@ -36,6 +41,7 @@ Attributes
 	default['minecraft_xms'] = "512M"
 	default['minecraft_server_motd'] = "Welcome to Chef Minecraft"
 	default['minecraft_server_whitelist'] = "true"
+	default['minecraft_pid'] = "/var/run/minecraft.pid"
 
 Minecraft users should be added to this file...
 	/templates/default/white-list.erb

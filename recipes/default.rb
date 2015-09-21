@@ -27,6 +27,9 @@ cookbook_file "/usr/bin/jsawk" do
 	group "root"
 end
 
+######################################
+# install minecraft
+######################################
 # create startup template
 template "/etc/init.d/minecraft" do
 	source "minecraft.init.d.erb"
@@ -37,7 +40,8 @@ template "/etc/init.d/minecraft" do
 	  :minecraft_mcpath => node['minecraft_mcpath'],
 	  :minecraft_backuppath => node['minecraft_backuppath'],
 	  :minecraft_cpu => node['minecraft_cpu'],
-	  :minecraft_xms => node['minecraft_xms']
+	  :minecraft_xms => node['minecraft_xms'],
+	  :minecraft_pid => node['minecraft_pid']
 	)
 	mode 0755
 	owner "root"
@@ -71,6 +75,7 @@ bash "run_update" do
 	code <<-EOH
 	/etc/init.d/minecraft update
 	EOH
+	only_if do ! File.exist?("#{node['minecraft_mcpath']}/minecraft_server.jar") end
 end
 
 # create minecraft server properties 
@@ -84,6 +89,7 @@ template "#{node['minecraft_mcpath']}/server.properties" do
         mode 0664
         owner "minecraft"
         group "minecraft"
+	only_if do ! File.exist?("#{node['minecraft_mcpath']}/server.properties") end
 end
 
 # create minecraft whitelist 
@@ -92,6 +98,7 @@ template "#{node['minecraft_mcpath']}/white-list.txt" do
         mode 0664
         owner "minecraft"
         group "minecraft"
+	only_if do ! File.exist?("#{node['minecraft_mcpath']}/white-list.json") end
 end
 
 # create minecraft eula file
@@ -99,7 +106,7 @@ template "#{node['minecraft_mcpath']}/eula.txt" do
         source "eula.erb"
         variables(
           :minecraft_eula => node['minecraft_eula']
-	}
+	)
         mode 0664
         owner "minecraft"
         group "minecraft"
@@ -116,14 +123,57 @@ bash "start_minecraft" do
 	sleep 10
         /etc/init.d/minecraft status
         EOH
+	only_if do ! File.exist?("#{node['minecraft_mcpath']}/whitelist.json") end
 end
 
+######################################
+# monit 
+######################################
+package 'monit' do
+	action :install
+end
+
+# monit config
+template "/etc/monit.d/minecraft.conf" do
+	source "minecraft-monit.erb"
+	mode 0755
+	owner "root"
+	group "root"
+end
+
+# monit start and set to start on boot
+service 'monit' do
+	action [ :enable, :start]
+end
+
+######################################
+# autopatch server using yum-updatesd
+######################################
+package 'yum-updatesd' do
+	action :install
+end
+
+# yum-updatesd config
+template "/etc/yum/yum-updatesd.conf" do
+	source "yum-updatesd.conf.erb"
+	mode 0755
+	owner "root"
+	group "root"
+end
+
+service 'yum-updatesd' do
+	action [ :enable, :start]
+end
+
+######################################
 # create cron
+######################################
 template "/etc/cron.monthly/minecraft-update" do
         source "minecraft-update.erb"
         mode 0755
         owner "root"
         group "root"
+	only_if do ! File.exist?('/etc/cron.monthly/minecraft-update') end
 end
 
 # create cron
@@ -133,4 +183,5 @@ template "/etc/cron.daily/minecraft-backup" do
         mode 0755
         owner "root"
         group "root"
+	only_if do ! File.exist?('/etc/cron.daily/minecraft-backup') end
 end

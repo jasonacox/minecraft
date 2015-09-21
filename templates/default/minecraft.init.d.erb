@@ -21,6 +21,7 @@ OPTIONS='nogui'
 USERNAME='<%= @minecraft_username %>'
 WORLD='<%= @minecraft_world %>'
 MCPATH='<%= @minecraft_mcpath %>'
+PID='<%= @minecraft_pid %>'
 BACKUPPATH='<%= @minecraft_backuppath %>'
 CPU_COUNT=<%= @minecraft_cpu %>
 INVOCATION="/usr/bin/java -Xms32M -Xmx<%= @minecraft_xms %> -jar $SERVICE $OPTIONS"
@@ -46,8 +47,10 @@ mc_start() {
     if pgrep -u $USERNAME -f $SERVICE > /dev/null
     then
       echo "$SERVICE is now running."
+      pgrep -u $USERNAME -f $SERVICE | head -1 > $PID
     else
       echo "Error! Could not start $SERVICE!"
+      rm $PID
     fi
   fi
 }
@@ -63,6 +66,7 @@ mc_saveoff() {
     sleep 10
   else
     echo "$SERVICE is not running. Not suspending saves."
+    rm $PID
   fi
 }
 
@@ -74,6 +78,7 @@ mc_saveon() {
     as_user "screen -p 0 -S minecraft -X eval 'stuff \"say SERVER BACKUP ENDED. Server going read-write...\"\015'"
   else
     echo "$SERVICE is not running. Not resuming saves."
+    rm $PID
   fi
 }
 
@@ -88,12 +93,15 @@ mc_stop() {
     sleep 7
   else
     echo "$SERVICE was not running."
+    rm $PID
   fi
   if pgrep -u $USERNAME -f $SERVICE > /dev/null
   then
     echo "Error! $SERVICE could not be stopped."
+    pgrep -u $USERNAME -f $SERVICE | head -1 > $PID
   else
     echo "$SERVICE is stopped."
+    rm $PID
   fi
 }
 
@@ -213,7 +221,6 @@ case "$1" in
     ;;
 
   *)
-  echo "This is JONATHAN's Server"
   echo "Usage: /etc/init.d/minecraft {start|stop|update|backup|status|restart|command \"server command\"}"
   exit 1
   ;;
