@@ -89,7 +89,6 @@ template "#{node['minecraft_mcpath']}/server.properties" do
         mode 0664
         owner "minecraft"
         group "minecraft"
-	only_if do ! File.exist?("#{node['minecraft_mcpath']}/server.properties") end
 end
 
 # create minecraft whitelist 
